@@ -143,10 +143,13 @@ popd
 #=========================================================
 
 test_opencv() {
+mkdir -p /workspace/logs
+pushd /workspace
 OPENCV_TEST_DATA_PATH=/opencv_extra/testdata \
 LD_LIBRARY_PATH=/workspace/install/lib:/workspace/install/runtime/lib/aarch64 \
 qemu-aarch64 -L /usr/aarch64-linux-gnu/ \
-    /workspace/install/bin/$1
+    /workspace/install/bin/${1} --gtest_output=xml:/workspace/logs/${1}.log
+popd
 }
 
 #=========================================================
@@ -156,6 +159,6 @@ build_tbb
 build_openvino
 build_ffmpeg
 build_opencv
-test_opencv opencv_test_core
-test_opencv opencv_test_dnn
-test_opencv opencv_test_gapi
+test_opencv opencv_test_core || true
+test_opencv opencv_test_dnn || true
+test_opencv opencv_test_gapi || true
