@@ -7,6 +7,13 @@ VPROTOBUF=v3.18.2
 VTBB=v2021.7.0
 VFFMPEG=n5.1.2
 GITOPT="--depth=1 --recurse-submodules"
+CMAKEOPT=(
+    "-DCMAKE_BUILD_TYPE=Release"
+    "-DCMAKE_INSTALL_PREFIX=/workspace/install"
+    "-DCMAKE_FIND_ROOT_PATH=/workspace/install"
+    "-DCMAKE_CXX_COMPILER_LAUNCHER=ccache"
+    "-DCMAKE_C_COMPILER_LAUNCHER=ccache"
+)
 
 export PATH=/usr/lib/ccache:${PATH}
 
@@ -48,10 +55,8 @@ D=/workspace/build-tbb
 mkdir -p ${D}
 pushd ${D} && rm -rf *
 cmake -GNinja \
+    ${CMAKEOPT[@]} \
     -DCMAKE_TOOLCHAIN_FILE=/openvino/cmake/arm64.toolchain.cmake \
-    -DCMAKE_INSTALL_PREFIX=/workspace/install \
-    -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-    -DCMAKE_C_COMPILER_LAUNCHER=ccache \
     /workspace/oneTBB
 ninja install
 popd
@@ -67,20 +72,16 @@ CXX=aarch64-linux-gnu-g++ \
 PKG_CONFIG_PATH=/workspace/install/lib/pkgconfig \
 PKG_CONFIG_LIBDIR=/workspace/install/lib \
 cmake -GNinja \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DENABLE_OPENCV=OFF \
+    ${CMAKEOPT[@]} \
     -DCMAKE_TOOLCHAIN_FILE=/openvino/cmake/arm64.toolchain.cmake \
-    -DCMAKE_INSTALL_PREFIX=/workspace/install \
+    -DENABLE_OPENCV=OFF \
     -DENABLE_INTEL_MYRIAD_COMMON=OFF \
     -DENABLE_INTEL_MYRIAD=OFF \
     -DENABLE_INTEL_GPU=OFF \
     -DENABLE_INTEL_CPU=OFF \
     -DENABLE_SAMPLES=OFF \
-    -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
-    -DCMAKE_C_COMPILER_LAUNCHER=ccache \
     -DENABLE_SYSTEM_PROTOBUF=ON \
     -DProtobuf_PROTOC_EXECUTABLE=/workspace/host/bin/protoc \
-    -DTBB_DIR=/workspace/install/lib/cmake/TBB \
     -DENABLE_SYSTEM_TBB=ON \
     -DOPENVINO_EXTRA_MODULES=/openvino_contrib/modules \
     -DIE_EXTRA_MODULES=/openvino_contrib/modules \
@@ -127,15 +128,15 @@ PKG_CONFIG_PATH=/workspace/install/lib/pkgconfig \
 PKG_CONFIG_LIBDIR=/workspace/install/lib \
 OpenVINO_DIR=/workspace/install/runtime/cmake \
 cmake -GNinja \
-    -DWITH_FFMPEG=ON \
-    -DCMAKE_FIND_ROOT_PATH=/workspace/install \
+    ${CMAKEOPT[@]} \
     -DCMAKE_TOOLCHAIN_FILE=/opencv/platforms/linux/aarch64-gnu.toolchain.cmake \
     -DOPENCV_EXTRA_EXE_LINKER_FLAGS="-Wl,--allow-shlib-undefined" \
     -DOPENCV_EXTRA_SHARED_LINKER_FLAGS="-Wl,--allow-shlib-undefined" \
-    -DCMAKE_INSTALL_PREFIX=/workspace/install \
-    -DINSTALL_TESTS=ON \
-    -DWITH_OPENVINO=ON \
+    -DWITH_FFMPEG=ON \
     -DWITH_TBB=ON \
+    -DWITH_OPENVINO=ON \
+    -DBUILD_EXAMPLES=ON \
+    -DINSTALL_TESTS=ON \
     -DBUILD_PROTOBUF=OFF \
     -DPROTOBUF_UPDATE_FILES=ON \
     -DProtobuf_PROTOC_EXECUTABLE=/workspace/host/bin/protoc \
@@ -147,12 +148,14 @@ popd
 #=========================================================
 
 test_opencv() {
+name=$1
+shift
 mkdir -p /workspace/logs
 pushd /workspace
 OPENCV_TEST_DATA_PATH=/opencv_extra/testdata \
 LD_LIBRARY_PATH=/workspace/install/lib:/workspace/install/runtime/lib/aarch64 \
 qemu-aarch64 -L /usr/aarch64-linux-gnu/ \
-    /workspace/install/bin/${1} --gtest_output=xml:/workspace/logs/${1}.log
+    /workspace/install/bin/${name} --gtest_output=xml:/workspace/logs/${name}.log $*
 popd
 }
 
@@ -166,3 +169,4 @@ build_opencv
 test_opencv opencv_test_core || true
 test_opencv opencv_test_dnn || true
 test_opencv opencv_test_gapi || true
+test_opencv opencv_version -v --threads --hw || true
