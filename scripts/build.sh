@@ -75,12 +75,15 @@ cmake -GNinja \
     -DENABLE_INTEL_MYRIAD=OFF \
     -DENABLE_INTEL_GPU=OFF \
     -DENABLE_INTEL_CPU=OFF \
+    -DENABLE_SAMPLES=OFF \
     -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
     -DCMAKE_C_COMPILER_LAUNCHER=ccache \
     -DENABLE_SYSTEM_PROTOBUF=ON \
     -DProtobuf_PROTOC_EXECUTABLE=/workspace/host/bin/protoc \
     -DTBB_DIR=/workspace/install/lib/cmake/TBB \
+    -DENABLE_SYSTEM_TBB=ON \
     -DOPENVINO_EXTRA_MODULES=/openvino_contrib/modules \
+    -DIE_EXTRA_MODULES=/openvino_contrib/modules \
     -DBUILD_java_api=OFF \
     -DBUILD_mo_pytorch=OFF \
     -DBUILD_nvidia_plugin=OFF \
