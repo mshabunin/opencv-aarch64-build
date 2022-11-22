@@ -67,7 +67,7 @@ CXX=aarch64-linux-gnu-g++ \
 PKG_CONFIG_PATH=/workspace/install/lib/pkgconfig \
 PKG_CONFIG_LIBDIR=/workspace/install/lib \
 cmake -GNinja \
-    -DCMAKE_BUILD_TYPE=Debug \
+    -DCMAKE_BUILD_TYPE=Release \
     -DENABLE_OPENCV=OFF \
     -DCMAKE_TOOLCHAIN_FILE=/openvino/cmake/arm64.toolchain.cmake \
     -DCMAKE_INSTALL_PREFIX=/workspace/install \
@@ -79,6 +79,7 @@ cmake -GNinja \
     -DCMAKE_C_COMPILER_LAUNCHER=ccache \
     -DENABLE_SYSTEM_PROTOBUF=ON \
     -DProtobuf_PROTOC_EXECUTABLE=/workspace/host/bin/protoc \
+    -DTBB_DIR=/workspace/install/lib/cmake/TBB \
     -DOPENVINO_EXTRA_MODULES=/openvino_contrib/modules \
     -DBUILD_java_api=OFF \
     -DBUILD_mo_pytorch=OFF \
