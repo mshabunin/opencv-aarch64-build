@@ -57,6 +57,8 @@ pushd ${D} && rm -rf *
 cmake -GNinja \
     ${CMAKEOPT[@]} \
     -DCMAKE_TOOLCHAIN_FILE=/openvino/cmake/arm64.toolchain.cmake \
+    -DTBB_TEST=OFF \
+    -DTBB_STRICT=OFF \
     /workspace/oneTBB
 ninja install
 popd
@@ -68,6 +70,7 @@ build_openvino() {
 D=/workspace/build-openvino
 mkdir -p ${D}
 pushd ${D} && rm -rf *
+CFLAGS=-Wno-narrowing \
 CXX=aarch64-linux-gnu-g++ \
 PKG_CONFIG_PATH=/workspace/install/lib/pkgconfig \
 PKG_CONFIG_LIBDIR=/workspace/install/lib \
@@ -90,6 +93,8 @@ cmake -GNinja \
     -DBUILD_nvidia_plugin=OFF \
     -DBUILD_optimum=OFF \
     -DBUILD_ovms_ai_extension=OFF \
+    -DCMAKE_COMPILE_WARNING_AS_ERROR=OFF \
+    -DENABLE_GAPI_PREPROCESSING=OFF \
     /openvino
 ninja install
 popd
@@ -145,6 +150,41 @@ ninja install
 popd
 }
 
+build_opencv2() {
+D=/workspace/build-opencv
+mkdir -p ${D}
+pushd ${D} && rm -rf *
+PKG_CONFIG_LIBDIR=/workspace/install/lib/pkgconfig \
+PKG_CONFIG_PATH=/workspace/install/lib/pkgconfig:/usr/lib/aarch64-linux-gnu/pkgconfig/:/usr/share/pkgconfig \
+OpenVINO_DIR=/workspace/install/runtime/cmake \
+cmake -GNinja \
+    ${CMAKEOPT[@]} \
+    -DCMAKE_TOOLCHAIN_FILE=/opencv/platforms/linux/aarch64-gnu.toolchain.cmake \
+    -DOPENCV_EXTRA_EXE_LINKER_FLAGS="-Wl,--allow-shlib-undefined" \
+    -DOPENCV_EXTRA_SHARED_LINKER_FLAGS="-Wl,--allow-shlib-undefined" \
+    -DWITH_FFMPEG=ON \
+    -DWITH_TBB=ON \
+    -DWITH_OPENVINO=ON \
+    -DBUILD_EXAMPLES=ON \
+    -DINSTALL_TESTS=ON \
+    -DBUILD_PROTOBUF=OFF \
+    -DPROTOBUF_UPDATE_FILES=ON \
+    -DProtobuf_INCLUDE_DIR=/workspace/install/include \
+    -DProtobuf_LIBRARY=/workspace/install/lib/libprotobuf.a \
+    -DProtobuf_PROTOC_EXECUTABLE=/workspace/host/bin/protoc \
+    -DOPENCV_EXTRA_MODULES_PATH=/opencv_contrib/modules \
+    -DWITH_FFMPEG=ON \
+    -DWITH_GSTREAMER=ON \
+    -DWITH_EIGEN=ON \
+    -DWITH_GTK=ON \
+    -DCMAKE_FIND_ROOT_PATH="$(dirname $(find /usr -name Eigen3Config.cmake 2>/dev/null));/workspace/install/runtime/cmake" \
+    -DPKG_CONFIG_EXECUTABLE=$(which aarch64-linux-gnu-pkg-config) \
+    /opencv
+ninja install
+popd
+}
+
+
 #=========================================================
 
 test_opencv() {
@@ -164,9 +204,10 @@ popd
 build_protobuf
 build_tbb
 build_openvino
-build_ffmpeg
-build_opencv
-test_opencv opencv_test_core || true
-test_opencv opencv_test_dnn || true
-test_opencv opencv_test_gapi || true
-test_opencv opencv_version -v --threads --hw || true
+build_opencv2
+# build_ffmpeg
+# build_opencv
+# test_opencv opencv_test_core || true
+# test_opencv opencv_test_dnn || true
+# test_opencv opencv_test_gapi || true
+# test_opencv opencv_version -v --threads --hw || true

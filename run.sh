@@ -19,4 +19,4 @@ docker run -it \
     -u $(id -u):$(id -g) \
     -e CCACHE_DIR=/workspace/.ccache \
     $TAG \
-    /scripts/build.sh
+    # /scripts/build.sh
