@@ -163,8 +163,6 @@ cmake -GNinja \
     -DOPENCV_EXTRA_EXE_LINKER_FLAGS="-Wl,--allow-shlib-undefined" \
     -DOPENCV_EXTRA_SHARED_LINKER_FLAGS="-Wl,--allow-shlib-undefined" \
     -DWITH_FFMPEG=ON \
-    -DWITH_TBB=ON \
-    -DWITH_OPENVINO=ON \
     -DBUILD_EXAMPLES=ON \
     -DINSTALL_TESTS=ON \
     -DBUILD_PROTOBUF=OFF \
@@ -175,12 +173,56 @@ cmake -GNinja \
     -DOPENCV_EXTRA_MODULES_PATH=/opencv_contrib/modules \
     -DWITH_FFMPEG=ON \
     -DWITH_GSTREAMER=ON \
-    -DWITH_EIGEN=ON \
     -DWITH_GTK=ON \
     -DCMAKE_FIND_ROOT_PATH="$(dirname $(find /usr -name Eigen3Config.cmake 2>/dev/null));/workspace/install/runtime/cmake" \
     -DPKG_CONFIG_EXECUTABLE=$(which aarch64-linux-gnu-pkg-config) \
     /opencv
+    # -DWITH_EIGEN=ON \
+    # -DWITH_TBB=ON \
+    # -DWITH_OPENVINO=ON \
 ninja install
+popd
+}
+
+build_opencv_python() {
+D=/workspace/build-opencv
+mkdir -p ${D}
+pushd ${D} && rm -rf *
+cmake -GNinja \
+    ${CMAKEOPT[@]} \
+    -DCMAKE_TOOLCHAIN_FILE=/opencv/platforms/linux/aarch64-gnu.toolchain.cmake \
+    -DINSTALL_TESTS=ON \
+    -DCMAKE_INSTALL_PREFIX=/workspace/install \
+    -DPYTHON3_INCLUDE_PATH=/usr/include/python3.11/ \
+    -DPYTHON3_NUMPY_INCLUDE_DIRS=/usr/include/python3.11/numpy \
+    /opencv
+ninja install
+popd
+}
+
+build_opencv_only() {
+D=/workspace/build-opencv
+mkdir -p ${D}
+pushd ${D} && rm -rf *
+cmake -GNinja \
+    ${CMAKEOPT[@]} \
+    -DCMAKE_TOOLCHAIN_FILE=/opencv/platforms/linux/aarch64-gnu.toolchain.cmake \
+    -DBUILD_EXAMPLES=ON \
+    -DINSTALL_TESTS=ON \
+    -DCMAKE_INSTALL_PREFIX=/workspace/install \
+    /opencv
+ninja install
+
+    # -DCMAKE_CXX_FLAGS=-march=armv8-a+nosimd -DENABLE_NEON=OFF \
+    # -DWITH_OPENCL=OFF \
+    # -DOPENCV_EXTRA_MODULES_PATH=/opencv_contrib/modules \
+    # -DCMAKE_CXX_FLAGS=-march=armv8-a+nosimd -DENABLE_NEON=OFF \
+    # -DENABLE_NEON=OFF \
+    # -DCV_DISABLE_OPTIMIZATION=ON \
+    # -DENABLE_NEON=OFF \
+    # -DCPU_BASELINE= \
+    # -DCMAKE_CXX_FLAGS=-march=armv8-a \
+
 popd
 }
 
@@ -201,12 +243,14 @@ popd
 
 #=========================================================
 
-build_protobuf
-build_tbb
-build_openvino
-build_opencv2
+# build_protobuf
+# build_tbb
+# build_openvino
+# build_opencv2
 # build_ffmpeg
 # build_opencv
+# build_opencv_only
+build_opencv_python
 # test_opencv opencv_test_core || true
 # test_opencv opencv_test_dnn || true
 # test_opencv opencv_test_gapi || true

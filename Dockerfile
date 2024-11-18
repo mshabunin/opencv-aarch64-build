@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y \
@@ -16,12 +16,12 @@ RUN apt-get install -y autoconf libtool g++ gcc scons
 
 RUN dpkg --add-architecture arm64 && \
     sed -i 's/deb /deb [arch=amd64] /' /etc/apt/sources.list && \
-    echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ focal main restricted" >> /etc/apt/sources.list && \
-    echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ focal-updates main restricted" >> /etc/apt/sources.list && \
-    echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ focal universe" >> /etc/apt/sources.list && \
-    echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ focal-updates universe" >> /etc/apt/sources.list && \
-    echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ focal multiverse" >> /etc/apt/sources.list && \
-    echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ focal-updates multiverse" >> /etc/apt/sources.list && \
+    echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy main restricted" >> /etc/apt/sources.list && \
+    echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-updates main restricted" >> /etc/apt/sources.list && \
+    echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy universe" >> /etc/apt/sources.list && \
+    echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-updates universe" >> /etc/apt/sources.list && \
+    echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy multiverse" >> /etc/apt/sources.list && \
+    echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ jammy-updates multiverse" >> /etc/apt/sources.list && \
     apt-get update
 
 RUN apt-get install -y \
@@ -34,6 +34,9 @@ RUN apt-get install -y \
     libavformat-dev:arm64 \
     libavfilter-dev:arm64 \
     libavdevice-dev:arm64 \
-    libavresample-dev:arm64 \
+    libavcodec-dev:arm64 \
     libavutil-dev:arm64 \
-    libglib2.0-dev:arm64
+    libswresample-dev:arm64 \
+    libglib2.0-dev:arm64 \
+    libpython3-dev:arm64 \
+    python3-numpy

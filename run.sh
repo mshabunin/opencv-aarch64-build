@@ -7,7 +7,7 @@ TAG=opencv-aarch64
 
 mkdir -p "${ROOT}/workspace"
 
-docker build -t $TAG "${ROOT}"
+docker build -t $TAG -f Dockerfile-deb "${ROOT}"
 docker run -it \
     -v "${ROOT}/../opencv:/opencv" \
     -v "${ROOT}/../opencv_contrib:/opencv_contrib" \
@@ -19,4 +19,4 @@ docker run -it \
     -u $(id -u):$(id -g) \
     -e CCACHE_DIR=/workspace/.ccache \
     $TAG \
-    # /scripts/build.sh
+    /scripts/build.sh
